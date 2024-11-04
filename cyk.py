@@ -1,6 +1,45 @@
+def create_cyk_table(String, result):
+    # inisialisasi tabel cyk list kosong
+    n = len(String)
+    table = [[[] for _ in range(n - j)] for j in range(n)]
+    
+    for i in range(n):
+        for j in range(n - i):
+            substring = String[j:j+i+1]
+            if substring in result:
+                table[i][j] = result[substring].strip('[]').split(',') if result[substring] != '[]' else []
+            else:
+                table[i][j] = []
+    
+    return table
+
+def print_table(String, table):
+    n = len(String)
+    max_width = max(
+        max(len(str(cell)) for row in table for cell in row),
+        max(len(ch) for ch in String)
+    )
+    
+    print("\nCYK Parsing Table:")
+    print("-" * (n * (max_width + 3) + 1))
+    
+    for i in range(n-1, -1, -1):
+        print("|", end="")
+        for j in range(n-i):
+            cell_content = ','.join(table[i][j]) if table[i][j] else "∅"
+            print(f" {cell_content:^{max_width}} |", end="")
+        print()
+        print("-" * (n * (max_width + 3) + 1))
+    
+    # Print the input string at the bottom
+    print("|", end="")
+    for ch in String:
+        print(f" {ch:^{max_width}} |", end="")
+    print()
+    print("-" * (n * (max_width + 3) + 1))
+
 NumOfNotations = int(input())
 grammar = list()
-
 
 def check_grammar(grammar):
     Variables = {}
@@ -23,7 +62,6 @@ def check_grammar(grammar):
         if Value == "undefiend":
             return False
     return True
-
 
 def cyk(String, Computed={}, grammar=grammar):
     if String in Computed:
@@ -54,11 +92,13 @@ def cyk(String, Computed={}, grammar=grammar):
                 "'", "").replace(" ", "")
             return Computed
 
-
 def print_cyk(String, grammar):
     result = cyk(String, {}, grammar)
     if result[String] != "[]" and "S" in result[String]:
-        print("YES")
+        print("String Diterima")
+        table = create_cyk_table(String, result)
+        print_table(String, table)
+        
         for i in range(1, len(String)+1):
             for j in range(len(String) - i):
                 if String[j:j+i] in result:
@@ -70,7 +110,7 @@ def print_cyk(String, grammar):
     else:
         print("NO")
 
-
+# Main program
 for i in range(NumOfNotations):
     Notation = input().split(" -> ")
     grammar.append(Notation)
